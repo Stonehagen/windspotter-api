@@ -3,9 +3,12 @@ const spotController = require('../controllers/spotController');
 
 const router = Router();
 
-router.get(
-  '/spot/:id',
-  spotController.spotGet,
-);
+router.post('/new', spotController.createSpotPost);
+
+router.get('/:id', spotController.spotGet);
+
+router.delete('/:id', spotController.spotDelete);
+
+router.put('/:id', spotController.spotPut);
 
 module.exports = router;

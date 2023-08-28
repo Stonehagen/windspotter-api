@@ -1,5 +1,40 @@
 /* eslint-disable no-underscore-dangle */
+const { body, validationResult } = require('express-validator');
 const { Spot } = require('../models');
+
+exports.createSpotPost = [
+  body('name')
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage('Spot name must be at least 3 chars long')
+    .isLength({ max: 50 })
+    .withMessage('Spot name cant be no longer than 50 chars')
+    .escape(),
+  body('lat')
+    .trim()
+    .isNumeric()
+    .withMessage('Latitude must be a number')
+    .escape(),
+  body('lon')
+    .trim()
+    .isNumeric()
+    .withMessage('Longitude must be a number')
+    .escape(),
+  async (req, res) => {
+    try {
+      const spot = new Spot({
+        name: req.body.name,
+        lat: req.body.lat,
+        lon: req.body.lon,
+      });
+
+      await spot.save();
+      return res.status(201).json({ spot });
+    } catch {
+      return res.status(400).json({ message: 'Something went wrong' });
+    }
+  },
+];
 
 exports.spotGet = async (req, res) => {
   try {
@@ -14,18 +49,3 @@ exports.spotGet = async (req, res) => {
     return res.status(400).json({ message: 'Something went wrong' });
   }
 };
-
-// const getAbsoluteLon = (lonStart, lonEnd) => {
-//   return lonStart > lonEnd ? lonEnd + 360 : lonEnd;
-// };
-
-// const getGribIndex = (forecastInfo, spot) => {
-//   // check if end value for longitute is lower than start value
-//   const lo2 = getAbsoluteLon(forecastInfo.lo1, forecastInfo.lo2);
-//   const spotLon = getAbsoluteLon(forecastInfo.lo1, spot.lon);
-
-//   const latRow = (spot.lat - forecastInfo.la1) / forecastInfo.dy;
-//   const latWidth = (lo2 - forecastInfo.lo1) / forecastInfo.dx + 1;
-//   const lonPos = (spotLon - forecastInfo.lo1) / forecastInfo.dx;
-//   return latRow * latWidth + lonPos;
-// };
