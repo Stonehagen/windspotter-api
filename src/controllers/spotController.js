@@ -14,6 +14,7 @@ exports.spotGet = async (req, res) => {
     return res.status(400).json({ message: 'Something went wrong' });
   }
 };
+
 // const getAbsoluteLon = (lonStart, lonEnd) => {
 //   return lonStart > lonEnd ? lonEnd + 360 : lonEnd;
 // };
