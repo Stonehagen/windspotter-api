@@ -110,3 +110,21 @@ exports.spotPut = [
     }
   },
 ];
+
+exports.SpotForecastGet = async (req, res) => {
+  try {
+    const spot = await Spot.findById(req.params.id);
+    populate({
+      path: 'forecasts',
+      populate: { path: 'forecastInfo' },
+    }).exec();
+
+    if (!spot) {
+      return res.status(400).json({ message: 'Spot not found' });
+    }
+
+    return res.status(200).json({ spot });
+  } catch {
+    return res.status(400).json({ message: 'failed to find that spot' });
+  }
+};
