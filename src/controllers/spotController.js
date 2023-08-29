@@ -91,7 +91,7 @@ exports.spotPut = [
   },
 ];
 
-exports.SpotForecastGet = async (req, res) => {
+exports.spotForecastGet = async (req, res) => {
   try {
     const spot = await Spot.findById(req.params.id)
       .populate({
