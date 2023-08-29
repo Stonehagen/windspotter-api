@@ -20,7 +20,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/spot', routes.user);
+app.use('/spot', routes.spot);
 
 // eslint-disable-next-line arrow-body-style
 httpServer.listen(process.env.PORT, () => {
