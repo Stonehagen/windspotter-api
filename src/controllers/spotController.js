@@ -57,6 +57,16 @@ exports.spotGet = async (req, res) => {
   }
 };
 
+
+exports.spotByNameGet = async (req, res) => {
+  try {
+    const spot = await Spot.findOne(req.params.name);
+    spot ? res.status(200).json({ spot }) : sendError(res, 'Spot not found');
+  } catch {
+    sendError(res, 'failed to find that spot');
+  }
+};
+
 exports.spotDelete = async (req, res) => {
   try {
     const spot = await Spot.findById(req.params.id);
@@ -105,3 +115,19 @@ exports.spotForecastGet = async (req, res) => {
     sendError(res, 'failed to find that spot');
   }
 };
+
+exports.spotForecastByNameGet = async (req, res) => {
+  try {
+    const spot = await Spot.findOne(req.params.name)
+      .populate({
+        path: 'forecasts',
+        populate: { path: 'forecastInfo' },
+      })
+      .exec();
+
+    spot ? res.status(200).json({ spot }) : sendError(res, 'Spot not found');
+  } catch {
+    sendError(res, 'failed to find that spot');
+  }
+};
+
