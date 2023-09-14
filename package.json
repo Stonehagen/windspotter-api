@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./src/index.js",
-    "devstart": "nodemon /src/index.js",
+    "devstart": "nodemon ./src/index.js",
     "serverstart": "DEBUG=windspotter-api:* npm run devstart"
   },
   "author": "Tobias Steinhagen",
