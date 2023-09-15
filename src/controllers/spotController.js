@@ -1,5 +1,5 @@
 const { body, validationResult } = require('express-validator');
-const { Spot } = require('../models');
+const { Spot, Forecast, ForecastInfo } = require('../models');
 
 // Helper function to send error response
 const sendError = (res, message) => res.status(400).json({ message });
@@ -57,10 +57,9 @@ exports.spotGet = async (req, res) => {
   }
 };
 
-
 exports.spotByNameGet = async (req, res) => {
   try {
-    const spot = await Spot.findOne({searchName: req.params.name});
+    const spot = await Spot.findOne({ searchName: req.params.name });
     spot ? res.status(200).json({ spot }) : sendError(res, 'Spot not found');
   } catch {
     sendError(res, 'failed to find that spot');
@@ -118,7 +117,7 @@ exports.spotForecastGet = async (req, res) => {
 
 exports.spotForecastByNameGet = async (req, res) => {
   try {
-    const spot = await Spot.findOne({searchName: req.params.name})
+    const spot = await Spot.findOne({ searchName: req.params.name })
       .populate({
         path: 'forecasts',
         populate: { path: 'forecastInfo' },
@@ -130,4 +129,3 @@ exports.spotForecastByNameGet = async (req, res) => {
     sendError(res, 'failed to find that spot');
   }
 };
-
