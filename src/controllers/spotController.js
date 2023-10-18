@@ -120,11 +120,44 @@ exports.spotForecastByNameGet = async (req, res) => {
     const spot = await Spot.findOne({ searchName: req.params.name })
       .populate({
         path: 'forecasts',
-        populate: { path: 'forecastInfo' },
-      })
-      .exec();
+        populate: { path: 'forecastInfo', model: 'ForecastInfo' },
+      });
 
-    spot ? res.status(200).json({ spot }) : sendError(res, 'Spot not found');
+    // filter remap and sort forecasts
+
+    // get the waveForecast cwam
+    const waveForecast = spot.forecasts.filter(
+      (forecast) => forecast.forecastInfo.name === 'cwam',
+    )[0];
+
+    // get the shortRangeWeather icon-d2
+    const shortRangeWeather = {...spot.forecasts.filter(
+      (forecast) => forecast.forecastInfo.name === 'icon-d2',
+    )}[0];
+
+    const spotForecast = {
+      name: spot.name,
+      lat: spot.lat,
+      lon: spot.lon,
+      forecast: {
+        mwd: waveForecast.mwd,
+        swh: waveForecast.swh,
+        tm10: waveForecast.tm10,
+        t_2m: shortRangeWeather.t_2m,
+        v_10m: shortRangeWeather.v_10m,
+        u_10m: shortRangeWeather.u_10m,
+        vmax_10m: shortRangeWeather.vmax_10m,
+        clct_mod: shortRangeWeather.clct_mod,
+        prr_gsp: shortRangeWeather.prr_gsp,
+      },
+    };
+
+    // ////midRangeWeather: IconEU - comming soon
+    // ////longRangeWeather: Gfs - comming soon
+
+    spot
+      ? res.status(200).json({ spot: spotForecast })
+      : sendError(res, 'Spot not found');
   } catch {
     sendError(res, 'failed to find that spot');
   }
