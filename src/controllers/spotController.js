@@ -170,6 +170,7 @@ exports.spotForecastByNameGet = async (req, res) => {
       u_10m: midRangeWeather.u_10m ? midRangeWeather.u_10m : [],
       vmax_10m: midRangeWeather.vmax_10m ? midRangeWeather.vmax_10m : [],
       clct_mod: midRangeWeather.clct_mod ? midRangeWeather.clct_mod : [],
+      prr_gsp: midRangeWeather.rain_gsp ? midRangeWeather.rain_gsp : [],
     };
 
     // go through the midRangeForecast
