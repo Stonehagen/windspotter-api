@@ -160,7 +160,7 @@ exports.spotForecastByNameGet = async (req, res) => {
         u_10m: shortRangeWeather.u_10m ? shortRangeWeather.u_10m : [],
         vmax_10m: shortRangeWeather.vmax_10m ? shortRangeWeather.vmax_10m : [],
         clct_mod: shortRangeWeather.clct_mod ? shortRangeWeather.clct_mod : [],
-        prr_gsp: shortRangeWeather.prr_gsp ? shortRangeWeather.prr_gsp : [],
+        rain_con: shortRangeWeather.rain_con ? shortRangeWeather.rain_con : [],
       },
     };
 
@@ -170,7 +170,7 @@ exports.spotForecastByNameGet = async (req, res) => {
       u_10m: midRangeWeather.u_10m ? midRangeWeather.u_10m : [],
       vmax_10m: midRangeWeather.vmax_10m ? midRangeWeather.vmax_10m : [],
       clct_mod: midRangeWeather.clct_mod ? midRangeWeather.clct_mod : [],
-      prr_gsp: midRangeWeather.rain_gsp ? midRangeWeather.rain_gsp : [],
+      rain_con: midRangeWeather.rain_con ? midRangeWeather.rain_con : [],
     };
 
     // go through the midRangeForecast
