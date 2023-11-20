@@ -19,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/spot', routes.spot);
+app.use('/map', routes.map);
 
 httpServer.listen(process.env.PORT, () => {
   return console.log(`api listening on port ${process.env.PORT}!`);
