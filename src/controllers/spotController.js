@@ -147,6 +147,12 @@ exports.spotForecastByNameGet = async (req, res) => {
       ),
     }[0];
 
+    const longRangeWeather = {
+      ...spot.forecasts.filter(
+        (forecast) => forecast.forecastInfo.name === 'gfs',
+      ),
+    }[0];
+
     const spotForecast = {
       name: spot.name,
       lat: spot.lat,
@@ -173,6 +179,15 @@ exports.spotForecastByNameGet = async (req, res) => {
       rain_gsp: midRangeWeather.rain_gsp ? midRangeWeather.rain_gsp : [],
     };
 
+    const longRangeForecast = {
+      t_2m: longRangeWeather.tmp ? longRangeWeather.tmp : [],
+      v_10m: longRangeWeather.vgrd ? longRangeWeather.vgrd : [],
+      u_10m: longRangeWeather.ugrd ? longRangeWeather.ugrd : [],
+      vmax_10m: 0,
+      clct_mod: longRangeWeather.tcdc ? longRangeWeather.tcdc : [],
+      rain_gsp: longRangeWeather.crain ? longRangeWeather.crain : [],
+    };
+
     // go through the midRangeForecast
     // delete all days that are in the shortRangeForecast
     // combine the objects in short and midrange forecast
@@ -190,7 +205,25 @@ exports.spotForecastByNameGet = async (req, res) => {
         }
       }
     }
-    // ////longRangeWeather: Gfs - comming soon
+
+    // go through the longRangeForecast
+    // delete all days that are in the midRangeForecast
+    // combine the objects in mid and longrange forecast
+    for (const [key, value] of Object.entries(longRangeForecast)) {
+      // get the end of the mid forecast term
+      const lastMidRangeForecastDay = getLastForecastDay(
+        midRangeWeather[key],
+      );
+      for (const [date, data] of Object.entries(value)) {
+        if (
+          new Date(date).getTime() >
+          new Date(lastMidRangeForecastDay).getTime()
+        ) {
+          spotForecast.forecast[key][date] = data;
+        }
+      }
+    }
+
 
     spot
       ? res.status(200).json({ spot: spotForecast })
