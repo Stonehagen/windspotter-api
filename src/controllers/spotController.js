@@ -25,7 +25,13 @@ const lonValidator = body('lon')
   .escape();
 
 const getLastForecastDay = (forecast) => {
-  return Object.keys(forecast).sort().reverse()[0];
+  // get the last day of the forecast and return it
+  // have to convert the date string to a date object while sorting
+  const lastDay = Object.keys(forecast)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .pop();
+  
+  return lastDay;
 };
 
 exports.spotListGet = async (req, res) => {
@@ -183,7 +189,7 @@ exports.spotForecastByNameGet = async (req, res) => {
       t_2m: longRangeWeather.tmp ? longRangeWeather.tmp : [],
       v_10m: longRangeWeather.vgrd ? longRangeWeather.vgrd : [],
       u_10m: longRangeWeather.ugrd ? longRangeWeather.ugrd : [],
-      vmax_10m: 0,
+      vmax_10m: [],
       clct_mod: longRangeWeather.tcdc ? longRangeWeather.tcdc : [],
       rain_gsp: longRangeWeather.crain ? longRangeWeather.crain : [],
     };
