@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const http = require('http');
 require('dotenv/config');
+require('./config/passport');
 
 const mongoDB = process.env.MONGODB_URI;
 mongoose.connect(mongoDB, { useUnifiedTopology: true, useNewUrlParser: true });
@@ -20,6 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/spot', routes.spot);
 app.use('/map', routes.map);
+app.use('/user', routes.user);
+app.use('/session', routes.session);
 
 httpServer.listen(process.env.PORT, () => {
   return console.log(`api listening on port ${process.env.PORT}!`);
