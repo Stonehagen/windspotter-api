@@ -55,7 +55,7 @@ const undefinedError = () => ({
 const usernameValidator = body('username')
   .trim()
   .isLength({ min: 5 })
-  .withMessage('Username must be at least 2 chars long')
+  .withMessage('Username must be at least 5 chars long')
   .escape();
 
 const emailValidator = body('email')
