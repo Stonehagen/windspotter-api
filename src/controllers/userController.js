@@ -19,6 +19,17 @@ const emailInUseError = (email) => ({
   ],
 });
 
+const usernameInUseError = (username) => ({
+  errors: [
+    {
+      value: username,
+      msg: 'Username already in use. Use a different username.',
+      param: 'username',
+      location: 'body',
+    },
+  ],
+});
+
 const falseLoginError = () => ({
   errors: [
     {
@@ -41,16 +52,10 @@ const undefinedError = () => ({
   ],
 });
 
-const firstNameValidator = body('firstName')
+const usernameValidator = body('username')
   .trim()
-  .isLength({ min: 2 })
-  .withMessage('First Name must be at least 2 chars long')
-  .escape();
-
-const lastNameValidator = body('lastName')
-  .trim()
-  .isLength({ min: 2 })
-  .withMessage('Last Name must be at least 2 chars long')
+  .isLength({ min: 5 })
+  .withMessage('Username must be at least 2 chars long')
   .escape();
 
 const emailValidator = body('email')
@@ -68,8 +73,7 @@ const passwordValidator = body('password')
   .escape();
 
 exports.createUserPost = [
-  firstNameValidator,
-  lastNameValidator,
+  usernameValidator,
   emailValidator,
   passwordValidator,
   async (req, res, next) => {
@@ -78,11 +82,20 @@ exports.createUserPost = [
       return res.status(400).json(errors);
     }
     try {
-      const userFound = await User.findOne({ email: req.body.email });
-      if (userFound) {
-        return res.status(400).json(emailInUseError(userFound.email));
+      const emailFound = await User.findOne({ email: req.body.email });
+      if (emailFound) {
+        return res.status(400).json(emailInUseError(emailFound.email));
       }
+
+      const usernameFound = await User.findOne({
+        username: req.body.username,
+      });
+      if (usernameFound) {
+        return res.status(400).json(usernameInUseError(usernameFound.username));
+      }
+
       const user = new User({
+        username: req.body.username,
         email: req.body.email,
         password: req.body.password,
       });

@@ -1,13 +1,11 @@
 exports.fakeUserData = {
-  firstName: 'Tobias',
-  lastName: 'Stonehagen',
+  username: 'Tobias',
   email: 'fake@user.com',
   password: '12345678',
 };
 
 exports.fakeUserData2 = {
-  firstName: 'Horst',
-  lastName: 'Mayer',
+  username: 'Horst',
   email: 'hoho@user.com',
   password: '12345678',
 };

@@ -25,8 +25,7 @@ describe('/user/sign-up Route', () => {
     request(app)
       .post('/user/sign-up')
       .send({
-        firstName: 'Tobias',
-        lastName: 'Stonehagen',
+        username: 'fakeuser',
         email: 'fakeuser.com',
         password: '12345678',
       })
@@ -40,8 +39,7 @@ describe('/user/sign-up Route', () => {
     request(app)
       .post('/user/sign-up')
       .send({
-        firstName: 'Tobias',
-        lastName: 'Stonehagen',
+        username: 'fakeuser',
         email: 'fake@user.com',
         password: 'abcdefgf',
       })
@@ -55,8 +53,7 @@ describe('/user/sign-up Route', () => {
     request(app)
       .post('/user/sign-up')
       .send({
-        firstName: 'Tobias',
-        lastName: 'S',
+        username: 'f',
         email: 'fake@user.com',
         password: '12345678',
       })
