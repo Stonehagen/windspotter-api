@@ -22,11 +22,6 @@ const UserSchema = new Schema({
     enum: ['kts', 'bft', 'mps', 'kph', 'mph'],
     default: 'kts',
   },
-  tempUnits: {
-    type: String,
-    enum: ['F', 'C'],
-    default: 'F',
-  },
 });
 
 // eslint-disable-next-line func-names
