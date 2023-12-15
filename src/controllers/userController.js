@@ -132,3 +132,28 @@ exports.logInUserPost = async (req, res) => {
     sendError(res, 'failed to log in');
   }
 };
+
+exports.addFavoritePost = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      const spotId = req.query.spotId;
+      const spotIndex = user.favorites.findIndex(
+        (favorite) => favorite.toString() === spotId,
+      );
+      if (spotIndex === -1) {
+        user.favorites.push(spotId);
+        await user.save();
+        res.status(200).json({ message: 'Spot added to favorites' });
+      } else {
+        user.favorites.splice(spotIndex, 1);
+        await user.save();
+        res.status(200).json({ message: 'Spot removed from favorites' });
+      }
+    } else {
+      sendError(res, 'User not found');
+    }
+  } catch {
+    sendError(res, 'failed to add favorite');
+  }
+}
