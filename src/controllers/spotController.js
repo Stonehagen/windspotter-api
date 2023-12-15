@@ -155,7 +155,7 @@ exports.spotForecastByNameGet = async (req, res) => {
 
     const longRangeWeather = {
       ...spot.forecasts.filter(
-        (forecast) => forecast.forecastInfo.name === 'gfs',
+        (forecast) => forecast.forecastInfo.name === 'gfsAWS',
       ),
     }[0];
 
