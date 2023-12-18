@@ -231,13 +231,15 @@ exports.spotForecastByNameGet = async (req, res) => {
     spotForecast.forecastModels = {
       shortRange: {
         name: 'ICON D2',
+        time: shortRangeWeather.forecastInfo.time,
         lastDay: lastShortRangeForecastDay,
       },
       midRange: {
         name: 'ICON EU',
+        time: midRangeWeather.forecastInfo.time,
         lastDay: lastMidRangeForecastDay,
       },
-      longRange: { name: 'GFS' },
+      longRange: { name: 'GFS', time: longRangeWeather.forecastInfo.time },
       wave: { name: waveForecast.forecastInfo.name },
     };
 
