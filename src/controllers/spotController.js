@@ -163,6 +163,7 @@ exports.spotForecastByNameGet = async (req, res) => {
       name: spot.name,
       lat: spot.lat,
       lon: spot.lon,
+      forecastModels: {},
       forecast: {
         mwd: waveForecast.mwd ? waveForecast.mwd : [],
         swh: waveForecast.swh ? waveForecast.swh : [],
@@ -194,14 +195,14 @@ exports.spotForecastByNameGet = async (req, res) => {
       rain_gsp: longRangeWeather.apcp ? longRangeWeather.apcp : [],
     };
 
+    let lastShortRangeForecastDay;
+    let lastMidRangeForecastDay;
     // go through the midRangeForecast
     // delete all days that are in the shortRangeForecast
     // combine the objects in short and midrange forecast
     for (const [key, value] of Object.entries(midRangeForecast)) {
       // get the end of the short forecast term
-      const lastShortRangeForecastDay = getLastForecastDay(
-        shortRangeWeather[key],
-      );
+      lastShortRangeForecastDay = getLastForecastDay(shortRangeWeather[key]);
       for (const [date, data] of Object.entries(value)) {
         if (
           new Date(date).getTime() >
@@ -217,7 +218,7 @@ exports.spotForecastByNameGet = async (req, res) => {
     // combine the objects in mid and longrange forecast
     for (const [key, value] of Object.entries(longRangeForecast)) {
       // get the end of the mid forecast term
-      const lastMidRangeForecastDay = getLastForecastDay(midRangeWeather[key]);
+      lastMidRangeForecastDay = getLastForecastDay(midRangeWeather[key]);
       for (const [date, data] of Object.entries(value)) {
         if (
           new Date(date).getTime() > new Date(lastMidRangeForecastDay).getTime()
@@ -226,6 +227,19 @@ exports.spotForecastByNameGet = async (req, res) => {
         }
       }
     }
+
+    spotForecast.forecastModels = {
+      shortRange: {
+        name: 'ICON D2',
+        lastDay: lastShortRangeForecastDay,
+      },
+      midRange: {
+        name: 'ICON EU',
+        lastDay: lastMidRangeForecastDay,
+      },
+      longRange: { name: 'GFS' },
+      wave: { name: waveForecast.forecastInfo.name },
+    };
 
     spot
       ? res.status(200).json({ spot: spotForecast })
