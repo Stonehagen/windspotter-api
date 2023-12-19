@@ -160,6 +160,7 @@ exports.spotForecastByNameGet = async (req, res) => {
     }[0];
 
     const spotForecast = {
+      _id: spot._id,
       name: spot.name,
       lat: spot.lat,
       lon: spot.lon,

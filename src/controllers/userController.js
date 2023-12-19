@@ -1,4 +1,5 @@
 const { body, validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 require('dotenv/config');
@@ -137,18 +138,18 @@ exports.addFavoritePost = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (user) {
-      const spotId = req.query.spotId;
+      const spotId = req.body.spotId;
       const spotIndex = user.favorites.findIndex(
         (favorite) => favorite.toString() === spotId,
       );
       if (spotIndex === -1) {
         user.favorites.push(spotId);
         await user.save();
-        res.status(200).json({ message: 'Spot added to favorites' });
+        res.status(200).json({ message: 'Spot added to favorites', user });
       } else {
         user.favorites.splice(spotIndex, 1);
         await user.save();
-        res.status(200).json({ message: 'Spot removed from favorites' });
+        res.status(200).json({ message: 'Spot removed from favorites', user });
       }
     } else {
       sendError(res, 'User not found');
@@ -156,4 +157,4 @@ exports.addFavoritePost = async (req, res) => {
   } catch {
     sendError(res, 'failed to add favorite');
   }
-}
+};
