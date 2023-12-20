@@ -153,6 +153,19 @@ exports.addFavoritePost = async (req, res) => {
     const user = await User.findById(req.user._id);
     if (user) {
       const spotId = req.body.spotId;
+      const favoriteCount = user.favorites.length;
+      if (favoriteCount >= 20) {
+        return res.status(400).json({
+          errors: [
+            {
+              value: '',
+              msg: 'You can only have 20 favorites. Please remove a favorite before adding another.',
+              param: '',
+              location: '',
+            },
+          ],
+        });
+      }
       const spotIndex = user.favorites.findIndex(
         (favorite) => favorite.toString() === spotId,
       );
