@@ -134,6 +134,20 @@ exports.logInUserPost = async (req, res) => {
   }
 };
 
+exports.getFavorites = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('favorites');
+    if (user) {
+      const favorites = user.favorites;
+      res.status(200).json({ favorites });
+    } else {
+      sendError(res, 'User not found');
+    }
+  } catch {
+    sendError(res, 'failed to get favorites');
+  }
+};
+
 exports.addFavoritePost = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
