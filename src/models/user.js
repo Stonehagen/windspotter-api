@@ -16,7 +16,7 @@ const UserSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   updatedUsernameAt: { type: Date, default: Date.now },
   updatedEmailAt: { type: Date, default: Date.now },
-  favorites: [{ type: Schema.Types.ObjectId, ref: 'Spots' }],
+  favorites: [{ type: Schema.Types.ObjectId, ref: 'Spot' }],
   windUnits: {
     type: String,
     enum: ['kts', 'bft', 'mps', 'kph', 'mph'],

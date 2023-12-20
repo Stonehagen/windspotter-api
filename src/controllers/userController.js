@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 require('dotenv/config');
 
-const { User } = require('../models');
+const { User, Spot } = require('../models');
 
 // Helper function to send error response
 const sendError = (res, message) => res.status(400).json({ message });
@@ -134,7 +134,7 @@ exports.logInUserPost = async (req, res) => {
   }
 };
 
-exports.getFavorites = async (req, res) => {
+exports.getFavoritesGet = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('favorites');
     if (user) {

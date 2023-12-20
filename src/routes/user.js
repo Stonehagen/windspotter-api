@@ -15,7 +15,7 @@ router.post(
 router.get(
   '/favorites',
   passport.authenticate('jwt', { session: false }),
-  userController.getFavorites,
+  userController.getFavoritesGet,
 );
 
 module.exports = router;
