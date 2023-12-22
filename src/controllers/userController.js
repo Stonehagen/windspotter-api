@@ -126,7 +126,7 @@ exports.createUserPost = [
           user.username
         },\n\nThanks for signing up to Windmate.de!\nPlease verify your email address by clicking the link below:\n\nhttps://windmate.de/verify/${user.verificationToken.replace(
           /\./g,
-          '_',
+          '-',
         )}\n\nHappy Surfing!\n\nYour Windmate`,
       });
       res.status(201).json({ message: 'user created' });
@@ -139,7 +139,7 @@ exports.createUserPost = [
 exports.verifyUserPost = async (req, res) => {
   try {
     const user = await User.findOne({
-      verificationToken: req.body.token.replace(/_/g, '.'),
+      verificationToken: req.body.token.replace(/-/g, '.'),
     });
     if (user) {
       if (user.verified) {
