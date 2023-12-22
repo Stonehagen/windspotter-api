@@ -105,22 +105,29 @@ exports.createUserPost = [
         return res.status(400).json(usernameInUseError(usernameFound.username));
       }
 
+      const verificationToken = jwt.sign(
+        { email: req.body.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '2d' },
+      );
       const user = new User({
         username: req.body.username,
         email: req.body.email,
         password: req.body.password,
-        verificationToken: jwt.sign(
-          { username: req.body.username },
-          process.env.JWT_SECRET,
-          { expiresIn: '1d' },
-        ),
+        verificationToken,
       });
       await user.save();
+
       await transporter.sendMail({
         from: '"Windmate.de" <tobi@windmate.de>',
         to: user.email,
         subject: 'Welcome to Windmate.de',
-        text: `Hi ${user.username},\n\nThanks for signing up to Windmate.de!\nPlease verify your email address by clicking the link below:\n\nhttps://windmate.de/verify/${user.verificationToken}\n\nHappy Surfing!\n\nYour Windmate`,
+        text: `Hi ${
+          user.username
+        },\n\nThanks for signing up to Windmate.de!\nPlease verify your email address by clicking the link below:\n\nhttps://windmate.de/verify/${user.verificationToken.replace(
+          /\./g,
+          '_',
+        )}\n\nHappy Surfing!\n\nYour Windmate`,
       });
       res.status(201).json({ message: 'user created' });
     } catch {
@@ -132,9 +139,21 @@ exports.createUserPost = [
 exports.verifyUserPost = async (req, res) => {
   try {
     const user = await User.findOne({
-      verificationToken: req.body.verificationToken,
+      verificationToken: req.body.token.replace(/_/g, '.'),
     });
     if (user) {
+      if (user.verified) {
+        return res.status(400).json({
+          errors: [
+            {
+              value: '',
+              msg: 'User already verified',
+              param: '',
+              location: '',
+            },
+          ],
+        });
+      }
       user.verified = true;
       await user.save();
       res.status(200).json({ message: 'user verified' });

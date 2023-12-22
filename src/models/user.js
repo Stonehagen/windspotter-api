@@ -22,6 +22,11 @@ const UserSchema = new Schema({
     enum: ['kts', 'bft', 'mps', 'kph', 'mph'],
     default: 'kts',
   },
+  colorMode: {
+    type: String,
+    enum: ['light', 'dark', 'auto'],
+    default: 'light',
+  },
   verified: { type: Boolean, default: false },
   verificationToken: { type: String },
   resetPasswordToken: { type: String },
