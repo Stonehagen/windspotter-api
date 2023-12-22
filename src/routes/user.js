@@ -17,5 +17,6 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   userController.getFavoritesGet,
 );
+router.post('/verify', userController.verifyUserPost);
 
 module.exports = router;

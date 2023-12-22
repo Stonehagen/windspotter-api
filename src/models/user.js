@@ -22,6 +22,10 @@ const UserSchema = new Schema({
     enum: ['kts', 'bft', 'mps', 'kph', 'mph'],
     default: 'kts',
   },
+  verified: { type: Boolean, default: false },
+  verificationToken: { type: String },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
 });
 
 // eslint-disable-next-line func-names

@@ -1,10 +1,20 @@
 const { body, validationResult } = require('express-validator');
-const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 require('dotenv/config');
 
-const { User, Spot } = require('../models');
+const { User } = require('../models');
+
+const transporter = nodemailer.createTransport({
+  host: 'smtps.udag.de',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 // Helper function to send error response
 const sendError = (res, message) => res.status(400).json({ message });
@@ -99,14 +109,42 @@ exports.createUserPost = [
         username: req.body.username,
         email: req.body.email,
         password: req.body.password,
+        verificationToken: jwt.sign(
+          { username: req.body.username },
+          process.env.JWT_SECRET,
+          { expiresIn: '1d' },
+        ),
       });
       await user.save();
+      await transporter.sendMail({
+        from: '"Windmate.de" <tobi@windmate.de>',
+        to: user.email,
+        subject: 'Welcome to Windmate.de',
+        text: `Hi ${user.username},\n\nThanks for signing up to Windmate.de!\nPlease verify your email address by clicking the link below:\n\nhttps://windmate.de/verify/${user.verificationToken}\n\nHappy Surfing!\n\nYour Windmate`,
+      });
       res.status(201).json({ message: 'user created' });
     } catch {
       sendError(res, 'failed to create a new User');
     }
   },
 ];
+
+exports.verifyUserPost = async (req, res) => {
+  try {
+    const user = await User.findOne({
+      verificationToken: req.body.verificationToken,
+    });
+    if (user) {
+      user.verified = true;
+      await user.save();
+      res.status(200).json({ message: 'user verified' });
+    } else {
+      sendError(res, 'User not found');
+    }
+  } catch {
+    sendError(res, 'failed to verify user');
+  }
+};
 
 exports.logInUserPost = async (req, res) => {
   try {
