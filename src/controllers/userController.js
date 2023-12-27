@@ -131,6 +131,21 @@ exports.createUserPost = [
   },
 ];
 
+exports.updateUserSettingsPut = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.settings = req.body.settings;
+      await user.save();
+      res.status(200).json({ message: 'user settings updated' });
+    } else {
+      sendError(res, 'User not found');
+    }
+  } catch {
+    sendError(res, 'failed to update user settings');
+  }
+};
+
 exports.verifyUserPost = async (req, res) => {
   try {
     const user = await User.findOne({

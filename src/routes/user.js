@@ -7,6 +7,11 @@ const router = Router();
 
 router.post('/sign-up', userController.createUserPost);
 router.post('/sign-in', userController.logInUserPost);
+router.put(
+  '/updateSettings',
+  passport.authenticate('jwt', { session: false }),
+  userController.updateUserSettingsPut,
+);
 router.post(
   '/addFavorite',
   passport.authenticate('jwt', { session: false }),
