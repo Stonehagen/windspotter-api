@@ -175,10 +175,12 @@ exports.verifyUserPost = async (req, res) => {
   }
 };
 
-exports.resetPasswordGet = async (req, res) => {
+exports.resetPasswordReqPost = [
+  emailValidator,  
+  async (req, res) => {
   try {
     const user = await User.findOne({
-      email: req.query.email,
+      email: req.body.email,
     });
     if (user) {
       const resetPasswordToken = jwt
@@ -193,14 +195,16 @@ exports.resetPasswordGet = async (req, res) => {
         from: '"Windmate.de"  <tobi@windmate.de>',
         to: user.email,
         subject: 'Reset your password',
-        text: `Hi ${user.username},\n\nYou are receiving this email because you requested to reset your password.\n\nPlease click the link below to reset your password:\n\nhttps://windmate.de/resetPassword/${user.resetPasswordToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nHappy Surfing!\n\nYour Windmate`,
+        text: `Hi ${user.username},\n\nYou are receiving this email because you requested to reset your password.\n\nPlease click the link below to reset your password:\n\nhttps://windmate.de/reset-password/${user.resetPasswordToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nHappy Surfing!\n\nYour Windmate`,
       });
       res.status(200).json({ message: 'reset password email sent' });
+    } else {
+      sendError(res, 'User not found');
     }
   } catch {
     sendError(res, 'failed to reset password');
   }
-};
+}];
 
 exports.resetPasswordPost = [
   passwordValidator,

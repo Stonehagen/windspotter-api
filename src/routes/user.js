@@ -23,7 +23,7 @@ router.get(
   userController.getFavoritesGet,
 );
 router.post('/verify', userController.verifyUserPost);
-router.get('/resetPassword', userController.resetPasswordGet);
+router.post('/resetPasswordReq', userController.resetPasswordReqPost);
 router.post('/resetPassword', userController.resetPasswordPost);
 
 module.exports = router;
