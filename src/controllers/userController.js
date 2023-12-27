@@ -105,11 +105,11 @@ exports.createUserPost = [
         return res.status(400).json(usernameInUseError(usernameFound.username));
       }
 
-      const verificationToken = jwt.sign(
-        { email: req.body.email },
-        process.env.JWT_SECRET,
-        { expiresIn: '2d' },
-      );
+      const verificationToken = jwt
+        .sign({ email: req.body.email }, process.env.JWT_SECRET, {
+          expiresIn: '2d',
+        })
+        .replace(/\./g, '');
       const user = new User({
         username: req.body.username,
         email: req.body.email,
@@ -122,12 +122,7 @@ exports.createUserPost = [
         from: '"Windmate.de" <tobi@windmate.de>',
         to: user.email,
         subject: 'Welcome to Windmate.de',
-        text: `Hi ${
-          user.username
-        },\n\nThanks for signing up to Windmate.de!\nPlease verify your email address by clicking the link below:\n\nhttps://windmate.de/verify/${user.verificationToken.replace(
-          /\./g,
-          '-',
-        )}\n\nHappy Surfing!\n\nYour Windmate`,
+        text: `Hi ${user.username},\n\nThanks for signing up to Windmate.de!\nPlease verify your email address by clicking the link below:\n\nhttps://windmate.de/verify/${user.verificationToken}\n\nHappy Surfing!\n\nYour Windmate`,
       });
       res.status(201).json({ message: 'user created' });
     } catch {
@@ -139,7 +134,7 @@ exports.createUserPost = [
 exports.verifyUserPost = async (req, res) => {
   try {
     const user = await User.findOne({
-      verificationToken: req.body.token.replace(/-/g, '.'),
+      verificationToken: req.body.token,
     });
     if (user) {
       if (user.verified) {
@@ -165,12 +160,78 @@ exports.verifyUserPost = async (req, res) => {
   }
 };
 
+exports.resetPasswordGet = async (req, res) => {
+  try {
+    const user = await User.findOne({
+      email: req.query.email,
+    });
+    if (user) {
+      const resetPasswordToken = jwt
+        .sign({ email: req.query.email }, process.env.JWT_SECRET, {
+          expiresIn: '2d',
+        })
+        .replace(/\./g, '');
+      user.resetPasswordToken = resetPasswordToken;
+      user.resetPasswordExpires = Date.now() + 3600000;
+      await user.save();
+      await transporter.sendMail({
+        from: '"Windmate.de"  <tobi@windmate.de>',
+        to: user.email,
+        subject: 'Reset your password',
+        text: `Hi ${user.username},\n\nYou are receiving this email because you requested to reset your password.\n\nPlease click the link below to reset your password:\n\nhttps://windmate.de/resetPassword/${user.resetPasswordToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nHappy Surfing!\n\nYour Windmate`,
+      });
+      res.status(200).json({ message: 'reset password email sent' });
+    }
+  } catch {
+    sendError(res, 'failed to reset password');
+  }
+};
+
+exports.resetPasswordPost = [
+  passwordValidator,
+  async (req, res) => {
+    try {
+      const user = await User.findOne({
+        resetPasswordToken: req.body.token,
+        resetPasswordExpires: { $gt: Date.now() },
+      });
+      if (user) {
+        user.password = req.body.password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+        await transporter.sendMail({
+          from: '"Windmate.de"   <tobi@windmate.de>',
+          to: user.email,
+          subject: 'Your password has been changed',
+          text: `Hi ${user.username},\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n\nHappy Surfing!\n\nYour Windmate`,
+        });
+        res.status(200).json({ message: 'password changed' });
+      }
+    } catch {
+      sendError(res, 'failed to reset password');
+    }
+  },
+];
+
 exports.logInUserPost = async (req, res) => {
   try {
     await new Promise((resolve, reject) => {
       passport.authenticate('login', { session: false }, (err, user) => {
         if (err || !user) {
           return res.status(401).json(falseLoginError());
+        }
+        if (!user.verified) {
+          return res.status(402).json({
+            errors: [
+              {
+                value: '',
+                msg: 'Please verify your email address before logging in.',
+                param: '',
+                location: '',
+              },
+            ],
+          });
         }
         req.login(user, { session: false }, (error) => {
           if (error) {
