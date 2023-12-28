@@ -243,7 +243,6 @@ exports.spotForecastByNameGet = async (req, res) => {
       longRange: { name: 'GFS', time: longRangeWeather.forecastInfo.time },
       wave: { name: waveForecast.forecastInfo.name },
     };
-
     spot
       ? res.status(200).json({ spot: spotForecast })
       : sendError(res, 'Spot not found');

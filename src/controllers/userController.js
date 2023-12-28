@@ -176,35 +176,36 @@ exports.verifyUserPost = async (req, res) => {
 };
 
 exports.resetPasswordReqPost = [
-  emailValidator,  
+  emailValidator,
   async (req, res) => {
-  try {
-    const user = await User.findOne({
-      email: req.body.email,
-    });
-    if (user) {
-      const resetPasswordToken = jwt
-        .sign({ email: req.query.email }, process.env.JWT_SECRET, {
-          expiresIn: '2d',
-        })
-        .replace(/\./g, '');
-      user.resetPasswordToken = resetPasswordToken;
-      user.resetPasswordExpires = Date.now() + 3600000;
-      await user.save();
-      await transporter.sendMail({
-        from: '"Windmate.de"  <tobi@windmate.de>',
-        to: user.email,
-        subject: 'Reset your password',
-        text: `Hi ${user.username},\n\nYou are receiving this email because you requested to reset your password.\n\nPlease click the link below to reset your password:\n\nhttps://windmate.de/reset-password/${user.resetPasswordToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nHappy Surfing!\n\nYour Windmate`,
+    try {
+      const user = await User.findOne({
+        email: req.body.email,
       });
-      res.status(200).json({ message: 'reset password email sent' });
-    } else {
-      sendError(res, 'User not found');
+      if (user) {
+        const resetPasswordToken = jwt
+          .sign({ email: req.query.email }, process.env.JWT_SECRET, {
+            expiresIn: '2d',
+          })
+          .replace(/\./g, '');
+        user.resetPasswordToken = resetPasswordToken;
+        user.resetPasswordExpires = Date.now() + 3600000;
+        await user.save();
+        await transporter.sendMail({
+          from: '"Windmate.de"  <tobi@windmate.de>',
+          to: user.email,
+          subject: 'Reset your password',
+          text: `Hi ${user.username},\n\nYou are receiving this email because you requested to reset your password.\n\nPlease click the link below to reset your password:\n\nhttps://windmate.de/reset-password/${user.resetPasswordToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nHappy Surfing!\n\nYour Windmate`,
+        });
+        res.status(200).json({ message: 'reset password email sent' });
+      } else {
+        sendError(res, 'User not found');
+      }
+    } catch {
+      sendError(res, 'failed to reset password');
     }
-  } catch {
-    sendError(res, 'failed to reset password');
-  }
-}];
+  },
+];
 
 exports.resetPasswordPost = [
   passwordValidator,
@@ -238,8 +239,10 @@ exports.logInUserPost = async (req, res) => {
     await new Promise((resolve, reject) => {
       passport.authenticate('login', { session: false }, (err, user) => {
         if (err || !user) {
+          console.log(user);
           return res.status(401).json(falseLoginError());
         }
+
         if (!user.verified) {
           return res.status(402).json({
             errors: [
