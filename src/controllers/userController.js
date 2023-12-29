@@ -237,9 +237,9 @@ exports.resetPasswordPost = [
 exports.logInUserPost = async (req, res) => {
   try {
     await new Promise((resolve, reject) => {
+
       passport.authenticate('login', { session: false }, (err, user) => {
         if (err || !user) {
-          console.log(user);
           return res.status(401).json(falseLoginError());
         }
 

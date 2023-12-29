@@ -35,6 +35,7 @@ const UserSchema = new Schema({
 
 // eslint-disable-next-line func-names
 UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
   const hash = await bcrypt.hash(this.password, 10);
   this.password = hash;
   next();
@@ -42,8 +43,7 @@ UserSchema.pre('save', async function (next) {
 
 // eslint-disable-next-line func-names
 UserSchema.methods.isValidPassword = async function (password) {
-  const user = this;
-  const isValid = await bcrypt.compare(password, user.password);
+  const isValid = await bcrypt.compare(password, this.password);
   return isValid;
 };
 
