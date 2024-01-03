@@ -118,7 +118,6 @@ exports.spotForecastGet = async (req, res) => {
         populate: { path: 'forecastInfo' },
       })
       .exec();
-
     spot ? res.status(200).json({ spot }) : sendError(res, 'Spot not found');
   } catch {
     sendError(res, 'failed to find that spot');
@@ -165,6 +164,7 @@ exports.spotForecastByNameGet = async (req, res) => {
       lat: spot.lat,
       lon: spot.lon,
       forecastModels: {},
+      windDirections: spot.windDirections,
       forecast: {
         mwd: waveForecast.mwd ? waveForecast.mwd : [],
         swh: waveForecast.swh ? waveForecast.swh : [],
