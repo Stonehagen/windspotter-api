@@ -24,19 +24,9 @@ const lonValidator = body('lon')
   .withMessage('Longitude must be a number')
   .escape();
 
-const getLastForecastDay = (forecast) => {
-  // get the last day of the forecast and return it
-  // have to convert the date string to a date object while sorting
-  const lastDay = Object.keys(forecast)
-    .sort((a, b) => new Date(a) - new Date(b))
-    .pop();
-
-  return lastDay;
-};
-
 exports.spotListGet = async (req, res) => {
   try {
-    const spots = await Spot.find();
+    const spots = await Spot.find().select('_id name searchName lat lon windDirections');
     res.status(200).json({ spots });
   } catch {
     sendError(res, 'failed to find any spots');
@@ -126,123 +116,17 @@ exports.spotForecastGet = async (req, res) => {
 
 exports.spotForecastByNameGet = async (req, res) => {
   try {
-    const spot = await Spot.findOne({ searchName: req.params.name }).populate({
-      path: 'forecasts',
-      populate: { path: 'forecastInfo', model: 'ForecastInfo' },
-    });
-
-    // filter remap and sort forecasts
-
-    // get the waveForecast cwam
-    const waveForecast = spot.forecasts.filter(
-      (forecast) => forecast.forecastInfo.name === 'cwam',
-    )[0];
-
-    // get the shortRangeWeather icon-d2
-    const shortRangeWeather = {
-      ...spot.forecasts.filter(
-        (forecast) => forecast.forecastInfo.name === 'icon-d2',
-      ),
-    }[0];
-
-    // get the midRangeWeather: Icon-eu
-    const midRangeWeather = {
-      ...spot.forecasts.filter(
-        (forecast) => forecast.forecastInfo.name === 'icon-eu',
-      ),
-    }[0];
-
-    const longRangeWeather = {
-      ...spot.forecasts.filter(
-        (forecast) => forecast.forecastInfo.name === 'gfsAWS',
-      ),
-    }[0];
+    const spot = await Spot.findOne({ searchName: req.params.name });
 
     const spotForecast = {
       _id: spot._id,
       name: spot.name,
       lat: spot.lat,
       lon: spot.lon,
-      forecastModels: {},
       windDirections: spot.windDirections,
-      forecast: {
-        mwd: waveForecast.mwd ? waveForecast.mwd : [],
-        swh: waveForecast.swh ? waveForecast.swh : [],
-        tm10: waveForecast.tm10 ? waveForecast.tm10 : [],
-        t_2m: shortRangeWeather.t_2m ? shortRangeWeather.t_2m : [],
-        v_10m: shortRangeWeather.v_10m ? shortRangeWeather.v_10m : [],
-        u_10m: shortRangeWeather.u_10m ? shortRangeWeather.u_10m : [],
-        vmax_10m: shortRangeWeather.vmax_10m ? shortRangeWeather.vmax_10m : [],
-        clct_mod: shortRangeWeather.clct_mod ? shortRangeWeather.clct_mod : [],
-        rain_gsp: shortRangeWeather.rain_gsp ? shortRangeWeather.rain_gsp : [],
-      },
+      forecast: spot.forecast,
     };
 
-    const midRangeForecast = {
-      t_2m: midRangeWeather.t_2m ? midRangeWeather.t_2m : [],
-      v_10m: midRangeWeather.v_10m ? midRangeWeather.v_10m : [],
-      u_10m: midRangeWeather.u_10m ? midRangeWeather.u_10m : [],
-      vmax_10m: midRangeWeather.vmax_10m ? midRangeWeather.vmax_10m : [],
-      clct_mod: midRangeWeather.clct_mod ? midRangeWeather.clct_mod : [],
-      rain_gsp: midRangeWeather.rain_gsp ? midRangeWeather.rain_gsp : [],
-    };
-
-    const longRangeForecast = {
-      t_2m: longRangeWeather.tmp ? longRangeWeather.tmp : [],
-      v_10m: longRangeWeather.vgrd ? longRangeWeather.vgrd : [],
-      u_10m: longRangeWeather.ugrd ? longRangeWeather.ugrd : [],
-      vmax_10m: longRangeWeather.gust ? longRangeWeather.gust : [],
-      clct_mod: longRangeWeather.tcdc ? longRangeWeather.tcdc : [],
-      rain_gsp: longRangeWeather.apcp ? longRangeWeather.apcp : [],
-    };
-
-    let lastShortRangeForecastDay;
-    let lastMidRangeForecastDay;
-    // go through the midRangeForecast
-    // delete all days that are in the shortRangeForecast
-    // combine the objects in short and midrange forecast
-    for (const [key, value] of Object.entries(midRangeForecast)) {
-      // get the end of the short forecast term
-      lastShortRangeForecastDay = getLastForecastDay(shortRangeWeather[key]);
-      for (const [date, data] of Object.entries(value)) {
-        if (
-          new Date(date).getTime() >
-          new Date(lastShortRangeForecastDay).getTime()
-        ) {
-          spotForecast.forecast[key][date] = data;
-        }
-      }
-    }
-
-    // go through the longRangeForecast
-    // delete all days that are in the midRangeForecast
-    // combine the objects in mid and longrange forecast
-    for (const [key, value] of Object.entries(longRangeForecast)) {
-      // get the end of the mid forecast term
-      lastMidRangeForecastDay = getLastForecastDay(midRangeWeather[key]);
-      for (const [date, data] of Object.entries(value)) {
-        if (
-          new Date(date).getTime() > new Date(lastMidRangeForecastDay).getTime()
-        ) {
-          spotForecast.forecast[key][date] = data;
-        }
-      }
-    }
-
-    spotForecast.forecastModels = {
-      shortRange: {
-        name: 'ICON D2',
-        time: shortRangeWeather.forecastInfo.time,
-        lastDay: lastShortRangeForecastDay,
-      },
-      midRange: {
-        name: 'ICON EU',
-        time: midRangeWeather.forecastInfo.time,
-        lastDay: lastMidRangeForecastDay,
-      },
-      longRange: { name: 'GFS', time: longRangeWeather.forecastInfo.time },
-      wave: { name: waveForecast.forecastInfo.name },
-    };
     spot
       ? res.status(200).json({ spot: spotForecast })
       : sendError(res, 'Spot not found');

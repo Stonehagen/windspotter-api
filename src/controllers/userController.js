@@ -237,7 +237,6 @@ exports.resetPasswordPost = [
 exports.logInUserPost = async (req, res) => {
   try {
     await new Promise((resolve, reject) => {
-
       passport.authenticate('login', { session: false }, (err, user) => {
         if (err || !user) {
           return res.status(401).json(falseLoginError());
@@ -276,7 +275,15 @@ exports.logInUserPost = async (req, res) => {
 
 exports.getFavoritesGet = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate('favorites');
+    // only populate _id name searchName lat lon and windDirections from spot
+    const user = await User.findById(req.user._id).populate('favorites', [
+      '_id',
+      'name',
+      'searchName',
+      'lat',
+      'lon',
+      'windDirections',
+    ]);
     if (user) {
       const favorites = user.favorites;
       res.status(200).json({ favorites });
