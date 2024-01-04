@@ -26,7 +26,9 @@ const lonValidator = body('lon')
 
 exports.spotListGet = async (req, res) => {
   try {
-    const spots = await Spot.find().select('_id name searchName lat lon windDirections');
+    const spots = await Spot.find().select(
+      '_id name searchName lat lon windDirections',
+    );
     res.status(200).json({ spots });
   } catch {
     sendError(res, 'failed to find any spots');
@@ -102,13 +104,22 @@ exports.spotPut = [
 
 exports.spotForecastGet = async (req, res) => {
   try {
-    const spot = await Spot.findById(req.params.id)
-      .populate({
-        path: 'forecasts',
-        populate: { path: 'forecastInfo' },
-      })
-      .exec();
-    spot ? res.status(200).json({ spot }) : sendError(res, 'Spot not found');
+    const spot = await Spot.findById(req.params.id).select(
+      '_id name lat lon windDirections forecast',
+    );
+
+    const spotForecast = {
+      _id: spot._id,
+      name: spot.name,
+      lat: spot.lat,
+      lon: spot.lon,
+      windDirections: spot.windDirections,
+      forecast: spot.forecast,
+    };
+
+    spot
+      ? res.status(200).json({ spot: spotForecast })
+      : sendError(res, 'Spot not found');
   } catch {
     sendError(res, 'failed to find that spot');
   }
@@ -116,7 +127,9 @@ exports.spotForecastGet = async (req, res) => {
 
 exports.spotForecastByNameGet = async (req, res) => {
   try {
-    const spot = await Spot.findOne({ searchName: req.params.name });
+    const spot = await Spot.findOne({ searchName: req.params.name }).select(
+      '_id name lat lon windDirections forecast',
+    );
 
     const spotForecast = {
       _id: spot._id,
