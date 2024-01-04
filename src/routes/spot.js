@@ -9,6 +9,7 @@ router.get('/name/:name', spotController.spotByNameGet);
 router.get('/:id', spotController.spotGet);
 router.delete('/:id', spotController.spotDelete);
 router.put('/:id', spotController.spotPut);
+router.post('/add', spotController.addSpotPost);
 
 router.get('/:id/forecast', spotController.spotForecastGet);
 router.get('/name/:name/forecast', spotController.spotForecastByNameGet);

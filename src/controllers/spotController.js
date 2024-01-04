@@ -147,3 +147,28 @@ exports.spotForecastByNameGet = async (req, res) => {
     sendError(res, 'failed to find that spot');
   }
 };
+
+exports.addSpotPost = [
+  nameValidator,
+  latValidator,
+  lonValidator,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({ errors });
+      } else {
+        const spot = await Spot.findOne({ searchName: req.body.name });
+        if (spot) {
+          res.status(200).json({ spot });
+        } else {
+          const spot = new Spot(req.body);
+          await spot.save();
+          res.status(201).json({ spot });
+        }
+      }
+    } catch {
+      sendError(res, 'failed to create new Spot');
+    }
+  },
+];
