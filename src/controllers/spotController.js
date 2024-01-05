@@ -27,7 +27,7 @@ const lonValidator = body('lon')
 exports.spotListGet = async (req, res) => {
   try {
     const spots = await Spot.find({
-      forecasts: { $exists: true, $not: { $size: 0 } },
+      forecast: { $exists: true, $not: { $size: 0 } },
     }).select('_id name searchName lat lon windDirections');
     res.status(200).json({ spots });
   } catch {
