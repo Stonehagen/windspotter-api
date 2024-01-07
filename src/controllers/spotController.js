@@ -28,7 +28,7 @@ exports.spotListGet = async (req, res) => {
   try {
     const spots = await Spot.find({
       forecast: { $exists: true, $not: { $size: 0 } },
-    }).select('_id name searchName lat lon windDirections');
+    }).select('_id name searchName lat lon windDirections').sort('name');
     res.status(200).json({ spots });
   } catch {
     sendError(res, 'failed to find any spots');
