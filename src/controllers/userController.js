@@ -135,7 +135,9 @@ exports.updateUserSettingsPut = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (user) {
-      user.settings = req.body.settings;
+      user.weigth = req.body.settings.weigth? req.body.settings.weigth : 75;
+      user.windUnits = req.body.settings.windUnit;
+      user.colorMode = req.body.settings.mode;
       await user.save();
       res.status(200).json({ message: 'user settings updated' });
     } else {
