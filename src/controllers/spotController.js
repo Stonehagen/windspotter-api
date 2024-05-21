@@ -105,12 +105,14 @@ exports.spotPut = [
 exports.spotForecastGet = async (req, res) => {
   try {
     const spot = await Spot.findById(req.params.id).select(
-      '_id name lat lon windDirections forecast',
+      '_id name lat lon sunrise sunset windDirections forecast',
     );
 
     const spotForecast = {
       _id: spot._id,
       name: spot.name,
+      sunrise: spot.sunrise,
+      sunset: spot.sunset,
       lat: spot.lat,
       lon: spot.lon,
       windDirections: spot.windDirections,
@@ -128,12 +130,14 @@ exports.spotForecastGet = async (req, res) => {
 exports.spotForecastByNameGet = async (req, res) => {
   try {
     const spot = await Spot.findOne({ searchName: req.params.name }).select(
-      '_id name lat lon windDirections forecast',
+      '_id name lat lon sunrise sunset windDirections forecast',
     );
-
+    
     const spotForecast = {
       _id: spot._id,
       name: spot.name,
+      sunrise: spot.sunrise,
+      sunset: spot.sunset,
       lat: spot.lat,
       lon: spot.lon,
       windDirections: spot.windDirections,
