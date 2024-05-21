@@ -27,7 +27,7 @@ const UserSchema = new Schema({
     enum: ['light', 'dark', 'auto'],
     default: 'light',
   },
-  weigth: { type: Number, default: 75 },
+  weight: { type: Number, default: 75 },
   verified: { type: Boolean, default: false },
   verificationToken: { type: String },
   resetPasswordToken: { type: String },
