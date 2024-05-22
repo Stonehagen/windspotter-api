@@ -190,7 +190,7 @@ exports.ForecastsByDayPost = async (req, res) => {
         $not: { $size: 0 },
       },
     })
-      .select('_id name searchName lat lon windDirections lightForecast')
+      .select('_id name searchName lat lon sunrise sunset windDirections lightForecast')
       .sort('name')
 
     // sort out every lightforecast that is not for the requested day
