@@ -179,9 +179,9 @@ exports.addSpotPost = [
   },
 ];
 
-exports.ForecastsByDayGet = async (req, res) => {
+exports.ForecastsByDayPost = async (req, res) => {
   // Get the date without time from the URL
-  const day = new Date();
+  const day = new Date(req.body.day);
   day.setHours(0, 0, 0, 0);
   try {
     const spots = await Spot.find({
