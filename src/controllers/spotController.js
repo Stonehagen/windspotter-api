@@ -28,7 +28,9 @@ exports.spotListGet = async (req, res) => {
   try {
     const spots = await Spot.find({
       forecast: { $exists: true, $not: { $size: 0 } },
-    }).select('_id name searchName lat lon windDirections').sort('name');
+    })
+      .select('_id name searchName lat lon windDirections')
+      .sort('name');
     res.status(200).json({ spots });
   } catch {
     sendError(res, 'failed to find any spots');
@@ -132,7 +134,7 @@ exports.spotForecastByNameGet = async (req, res) => {
     const spot = await Spot.findOne({ searchName: req.params.name }).select(
       '_id name lat lon sunrise sunset windDirections forecast',
     );
-    
+
     const spotForecast = {
       _id: spot._id,
       name: spot.name,
@@ -176,3 +178,31 @@ exports.addSpotPost = [
     }
   },
 ];
+
+exports.ForecastsByDayGet = async (req, res) => {
+  // Get the date without time from the URL
+  const day = new Date();
+  day.setHours(0, 0, 0, 0);
+  try {
+    const spots = await Spot.find({
+      lightForecast: {
+        $exists: true,
+        $not: { $size: 0 },
+      },
+    })
+      .select('_id name searchName lat lon windDirections lightForecast')
+      .sort('name')
+
+    // sort out every lightforecast that is not for the requested day
+    spots.forEach((spot) => {
+      spot.lightForecast = spot.lightForecast.filter((forecast) => {
+        const forecastTime = new Date(forecast.time);
+        forecastTime.setHours(0, 0, 0, 0);
+        return forecastTime.getTime() === day.getTime();
+      });
+    });
+    res.status(200).json({ spots });
+  } catch {
+    sendError(res, 'failed to find any spots');
+  }
+};

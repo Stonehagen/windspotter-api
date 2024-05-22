@@ -14,4 +14,6 @@ router.post('/add', spotController.addSpotPost);
 router.get('/:id/forecast', spotController.spotForecastGet);
 router.get('/name/:name/forecast', spotController.spotForecastByNameGet);
 
+router.get('/day/:day', spotController.ForecastsByDayGet);
+
 module.exports = router;
