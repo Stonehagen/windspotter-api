@@ -190,8 +190,10 @@ exports.ForecastsByDayPost = async (req, res) => {
         $not: { $size: 0 },
       },
     })
-      .select('_id name searchName lat lon sunrise sunset windDirections lightForecast')
-      .sort('name')
+      .select(
+        '_id name searchName lat lon sunrise sunset windDirections lightForecast',
+      )
+      .sort('name');
 
     // sort out every lightforecast that is not for the requested day
     spots.forEach((spot) => {
@@ -211,11 +213,13 @@ exports.searchSpotGet = async (req, res) => {
   try {
     const spots = await Spot.find({
       searchName: { $regex: req.params.search, $options: 'i' },
+      forecast: { $exists: true, $not: { $size: 0 } },
     })
       .select('_id name searchName lat lon windDirections')
+      .limit(5)
       .sort('name');
     res.status(200).json({ spots });
   } catch {
     sendError(res, 'failed to find any spots');
   }
-}
+};
