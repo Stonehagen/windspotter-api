@@ -206,3 +206,16 @@ exports.ForecastsByDayPost = async (req, res) => {
     sendError(res, 'failed to find any spots');
   }
 };
+
+exports.searchSpotGet = async (req, res) => {
+  try {
+    const spots = await Spot.find({
+      searchName: { $regex: req.params.search, $options: 'i' },
+    })
+      .select('_id name searchName lat lon windDirections')
+      .sort('name');
+    res.status(200).json({ spots });
+  } catch {
+    sendError(res, 'failed to find any spots');
+  }
+}
